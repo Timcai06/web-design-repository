@@ -1,6 +1,6 @@
 # Design Pattern Library — 设计模式库
 
-这是一个跨项目的设计模式集合，从 5 个顶尖案例中提炼出可复用的 UI/动效设计模式。
+这是一个跨项目的设计模式集合，从 6 个顶尖案例中提炼出可复用的 UI/动效设计模式。
 
 ---
 
@@ -48,3 +48,4 @@
 | **Oryzo** | Scrub + Play-on-enter | Inset grid | Y + Opacity | Three.js | Video hover + tilt | power3.out, 活泼 |
 | **Luke Baffait** | Play-on-enter + Scrub | — | Word blur + Char bounce | Custom WebGL | ASCII interactive + 3D tilt | power4.out, 直接 |
 | **Persepolis** | Click/Progress-bar | — | — | Unity → WebGL | Click reveal | power2.inOut, 庄重 |
+| **Active Theory** | Continuous 3D scroll | — | — | Hydra (自研 WebGL) | Multi-user cursor + Particle | state-based, 性能优先 |

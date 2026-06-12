@@ -11,6 +11,7 @@
 | [Oryzo AI](oryzo/) | Lusion | Three.js + Astro + Rive | 产品营销站 |
 | [Luke Baffait](lukebaffait/) | Lusion | 自定义 WebGL + 纯 JS | 个人作品集 |
 | [Persepolis](persepolis/) | Media.Monks | Unity + 自定义 WebGL | 虚拟博物馆 |
+| [Active Theory](activetheory/) | Active Theory | Hydra (自研 WebGL) + WebSocket + AI | 工作室作品集 |
 
 ## 结构
 

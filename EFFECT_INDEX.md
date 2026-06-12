@@ -268,12 +268,34 @@
 
 ---
 
+## Active Theory (ATv6) — activetheory.net
+
+| # | Effect Name | Core Technology | Complexity | Performance | Category |
+|---|---|---|---|---|---|
+| 96 | Hydra 3D Engine (自研) | WebGL + GLSL | Very High | High | 3D |
+| 97 | Multi-User Networked Cursors | WebSocket + WebGL | High | Medium | Interactive |
+| 98 | AI Chat Navigation | LLM + Semantic Search | High | Low | Navigation |
+| 99 | 3D Immersive Environment (Scroll) | Hydra + GLSL | Very High | High | Hero |
+| 100 | Colorful Particle Tube Trails | WebGL Particles | Medium | Medium | Interactive |
+| 101 | ActiveFrame Video (WebCodecs) | WebCodecs API | High | Medium | Video |
+| 102 | Pillbox Speed-Responsive Nav | CSS + JS | Low | Low | Navigation |
+| 103 | Draco Mesh Compression | Draco + WebWorker | Medium | Low | 3D |
+| 104 | Hydra GUI (可视化编辑器) | Hydra + Firebase | Very High | Low | Tooling |
+| 105 | Project Filter by Tags | JS | Low | Low | Navigation |
+| 106 | WebWorker Parallel Processing | WebWorker | High | Low | Performance |
+| 107 | 3D Scene Transition (Project→Project) | Hydra | Very High | High | Transition |
+| 108 | Neon + Dark Visual Style | CSS + GLSL | Medium | Low | Style |
+| 109 | Lazy-loaded 3D Assets | Hydra Loader | Medium | Low | Performance |
+| 110 | State-based Functional JS (vs OOP) | JS Architecture | Medium | Low | Architecture |
+
+---
+
 ## 快速统计
 
 ```
-总效果数: 95
+总效果数: 110
 技术分布: CSS 8 | CSS+GSAP 9 | GSAP 18 | Rive 13 | Three.js/WebGL 12 | Canvas 3 | 其他 32
-项目分布: landonorris 25 | lukebaffait 28 | zentry 15 | oryzo 13 | persepolis 14
+项目分布: landonorris 25 | lukebaffait 28 | zentry 15 | oryzo 13 | persepolis 14 | activetheory 15
 ```
 
 > 建议：从 🔥 Low Complexity + Low Cost 开始，快速提升页面质感。确认方向后再投入更高复杂度的效果。
