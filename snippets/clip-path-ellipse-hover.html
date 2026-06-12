@@ -24,22 +24,12 @@ body {
   cursor: pointer;
 }
 
-.reveal-card__base {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.reveal-card__base .bg {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  color: rgba(255,255,255,0.8);
-}
+  .reveal-card__base {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 
 .reveal-card__overlay {
   position: absolute;
@@ -50,16 +40,11 @@ body {
   /* landonorris 用的 easing: 从容、优雅、品牌感 */
 }
 
-.reveal-card__overlay .bg {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  color: rgba(255,255,255,0.9);
-}
+  .reveal-card__overlay img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 
 .reveal-card:hover .reveal-card__overlay {
   /* 120% 让椭圆超出底部，视觉更饱满 */
@@ -86,31 +71,25 @@ body {
 <div>
   <div class="demo-label">
     <h1>Clip-Path Ellipse Hover</h1>
-    <p>来源: landonorris.com · 纯 CSS · 零 JS · 渐变占位图</p>
+    <p>来源: landonorris.com · 纯 CSS · 零 JS</p>
   </div>
   <div class="demo-grid">
     <div class="reveal-card">
-      <div class="reveal-card__base">
-        <div class="bg" style="background: linear-gradient(135deg, #2d3436, #636e72);">BASE A</div>
-      </div>
+      <img class="reveal-card__base" src="https://picsum.photos/seed/a/320/320" alt="base">
       <div class="reveal-card__overlay">
-        <div class="bg" style="background: linear-gradient(135deg, #e17055, #d63031);">OVERLAY A</div>
+        <img src="https://picsum.photos/seed/b/320/320" alt="overlay">
       </div>
     </div>
     <div class="reveal-card">
-      <div class="reveal-card__base">
-        <div class="bg" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">BASE B</div>
-      </div>
+      <img class="reveal-card__base" src="https://picsum.photos/seed/c/320/320" alt="base">
       <div class="reveal-card__overlay">
-        <div class="bg" style="background: linear-gradient(135deg, #0f3460, #533483);">OVERLAY B</div>
+        <img src="https://picsum.photos/seed/d/320/320" alt="overlay">
       </div>
     </div>
     <div class="reveal-card">
-      <div class="reveal-card__base">
-        <div class="bg" style="background: linear-gradient(135deg, #2b2b2b, #4a4a4a);">BASE C</div>
-      </div>
+      <img class="reveal-card__base" src="https://picsum.photos/seed/e/320/320" alt="base">
       <div class="reveal-card__overlay">
-        <div class="bg" style="background: linear-gradient(135deg, #006064, #00838f);">OVERLAY C</div>
+        <img src="https://picsum.photos/seed/f/320/320" alt="overlay">
       </div>
     </div>
   </div>
