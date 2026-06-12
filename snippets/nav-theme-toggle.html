@@ -24,13 +24,11 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: system-ui; }
 
-/* ====== 导航 ====== */
 nav {
   position: fixed; top: 0; left: 0; right: 0;
   z-index: 100;
   padding: 20px 32px;
   display: flex; justify-content: space-between; align-items: center;
-  /* 默认: 浅色（适配深色 Hero） */
   color: #fff;
   background: transparent;
   transition: color 0.4s ease, background 0.4s ease;
@@ -38,21 +36,17 @@ nav {
 }
 
 nav.light {
-  /* 浅色背景上: 改为深色 */
   color: #1a1a1a;
   background: rgba(255,255,255,0.9);
   mix-blend-mode: normal;
   backdrop-filter: blur(8px);
 }
 
-nav .logo {
-  font-size: 14px; font-weight: 600; letter-spacing: 0.1em;
-}
+nav .logo { font-size: 14px; font-weight: 600; letter-spacing: 0.1em; }
 nav .links { display: flex; gap: 20px; font-size: 13px; }
 nav .links a { color: inherit; text-decoration: none; opacity: 0.6; transition: opacity 0.3s; }
 nav .links a:hover { opacity: 1; }
 
-/* ====== Sections ====== */
 .section { height: 100vh; display: grid; place-items: center; }
 .section h2 { font-size: 24px; font-weight: 300; letter-spacing: 0.05em; }
 .section p { font-size: 13px; opacity: 0.4; margin-top: 8px; }
@@ -62,10 +56,8 @@ nav .links a:hover { opacity: 1; }
 .content-2 { background: #e8e8e0; color: #1a1a1a; }
 .footer { background: #0a0a0f; color: #fff; }
 
-/* ====== 触发器（空 div，只在特定位置） ====== */
 .theme-trigger {
   position: absolute;
-  /* 放在 content-1 顶部偏移处，让导航在实际进入浅色区之前就切换 */
   top: -100px;
   height: 1px;
   width: 100%;
@@ -109,15 +101,13 @@ nav .links a:hover { opacity: 1; }
   <div><h2>Footer</h2><p>导航回到白色</p></div>
 </section>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
 <script>
-// ====== ScrollTrigger 主题切换 ======
 gsap.registerPlugin(ScrollTrigger)
 
 const nav = document.getElementById('nav')
 
-// 进入浅色区 → 导航变深
 ScrollTrigger.create({
   trigger: '#trigger1',
   start: 'top center',
@@ -125,7 +115,6 @@ ScrollTrigger.create({
   onLeaveBack: () => nav.classList.remove('light'),
 })
 
-// 回到深色区 → 导航变白
 ScrollTrigger.create({
   trigger: '#trigger2',
   start: 'top center',

@@ -55,7 +55,6 @@ body {
   aspect-ratio: 1;
   border-radius: 12px;
   overflow: hidden;
-  background: #e0ddd5;
   /* 初始状态: clip 到底部（不可见） */
   clip-path: inset(0 0 100% 0);
   will-change: clip-path;
@@ -66,8 +65,15 @@ body {
   clip-path: inset(0 0 0 0);
 }
 
-.grid-item img {
-  width: 100%; height: 100%; object-fit: cover;
+.grid-item .color-block {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: rgba(255,255,255,0.85);
 }
 
 .grid-item .label {
@@ -104,27 +110,27 @@ body {
 
   <div class="grid" id="revealGrid">
     <div class="grid-item grid-item--wide" data-offset="0">
-      <img src="https://picsum.photos/seed/g1/600/600" alt="">
+      <div class="color-block" style="background: linear-gradient(135deg, #667eea, #764ba2);">Brand Identity</div>
       <span class="label">Brand Identity</span>
     </div>
     <div class="grid-item" data-offset="100">
-      <img src="https://picsum.photos/seed/g2/300/300" alt="">
+      <div class="color-block" style="background: linear-gradient(135deg, #f093fb, #f5576c);">UI Design</div>
       <span class="label">UI Design</span>
     </div>
     <div class="grid-item" data-offset="200">
-      <img src="https://picsum.photos/seed/g3/300/300" alt="">
+      <div class="color-block" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">Motion</div>
       <span class="label">Motion</span>
     </div>
     <div class="grid-item" data-offset="350">
-      <img src="https://picsum.photos/seed/g4/300/300" alt="">
+      <div class="color-block" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">3D</div>
       <span class="label">3D</span>
     </div>
     <div class="grid-item" data-offset="450">
-      <img src="https://picsum.photos/seed/g5/300/300" alt="">
+      <div class="color-block" style="background: linear-gradient(135deg, #fa709a, #fee140);">WebGL</div>
       <span class="label">WebGL</span>
     </div>
     <div class="grid-item" data-offset="550">
-      <img src="https://picsum.photos/seed/g6/300/300" alt="">
+      <div class="color-block" style="background: linear-gradient(135deg, #a18cd1, #fbc2eb);">Strategy</div>
       <span class="label">Strategy</span>
     </div>
   </div>

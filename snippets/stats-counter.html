@@ -13,10 +13,11 @@
  * - GSAP onUpdate + power3.out → 先快后慢，模拟"真实增长曲线"
  * - 滚动触发 → 用户滚动到数字区域时才开始计数，制造"此刻开始"的临场感
  *
- * DECISION: GSAP vs IntersectionObserver + setInterval?
- * - GSAP: 更流畅（RAF 驱动），可精确控制 ease，性能更好
- * - setInterval: 实现简单但可能丢帧，ease 需要手动计算
- * - 推荐 GSAP（zentry 做法），数字量多时性能优势明显
+ * DECISION: GSAP vs RAF vs setInterval?
+ * - GSAP: 最精确的 ease 控制，power3.out 是标准贝塞尔曲线
+ * - RAF: 接近 GSAP 但 ease 曲线需手动实现
+ * - setInterval: 不推荐，可能丢帧
+ * - 这里用 GSAP（zentry 原版做法），使用本地 vendor 文件
  *
  * 适合:
  * - 信任指标（$ funded, users, countries）
@@ -45,9 +46,7 @@ body {
   flex-wrap: wrap;
 }
 
-.counter-item {
-  text-align: center;
-}
+.counter-item { text-align: center; }
 
 .counter-item .number {
   font-size: 56px;
@@ -76,11 +75,7 @@ body {
   letter-spacing: 0.02em;
 }
 
-/* ====== 调参 ====== */
-/* 数字字体: 56px hero, 32px subtitle, 20px 小标签 */
-/* gradient: 品牌色主色 + 深色，2-3 色渐变 */
-/* duration: 1.5-2.5s — 太快看不清过程，太慢等不急 */
-/* ease: power3.out — 先快后慢（"增长"感）vs power1.out — 匀速（"计数"感） */
+/* 调参: 数字 56px hero / gradient 品牌色 / duration 1.5-2.5s / ease power3.out */
 </style>
 </head>
 <body>
@@ -110,12 +105,11 @@ body {
 
 <div class="spacer">end</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
 <script>
 gsap.registerPlugin(ScrollTrigger)
 
-// ====== 计数器动画 ======
 function initCounters(containerId) {
   const container = document.getElementById(containerId)
   const numbers = container.querySelectorAll('.number[data-target]')
@@ -134,11 +128,9 @@ function initCounters(containerId) {
           duration: 2,
           ease: 'power3.out',
           onUpdate: () => {
-            // 数字较大时省略小数
-            const display = target > 100
+            numEl.textContent = target > 100
               ? Math.round(obj.value)
               : obj.value.toFixed(1)
-            numEl.textContent = display
           },
         })
       },
