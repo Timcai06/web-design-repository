@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Past & Present Slider — 对比滑块</title>
+<style>
+/*
+ * 来源: Persepolis Reimagined (Media.Monks for Getty Museum)
+ *
+ * DESIGN RATIONALE:
+ * - 左右拖动对比是"理解变化"最自然的交互 —— 不需要任何教程
+ * - 中间分割线 + 拖动手柄 = 视觉信号:"这里可以拖"
+ * - 适合: before/after、重建 vs 现状、旧 vs 新、有 vs 无
+ *
+ * DECISION: clip-path 分割 vs 两个半透明层叠加？
+ * - clip-path: 左右两个完整图各显示一半——更清晰，没有重叠干扰
+ * - 半透明叠加: 适合"X光"式对比（如医疗影像），不适合视觉对比
+ * - 这里用 clip-path: inset 方案
+ *
+ * 适合:
+ * - 产品改版 before/after
+ * - 照片编辑对比
+ * - 历史重建（Persepolis 用例）
+ * - 设计稿 vs 实现
+ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #1a1a1a; font-family: system-ui, sans-serif;
+  display: grid; place-items: center; min-height: 100vh; color: #fff;
+}
+
+.demo-label { text-align: center; margin-bottom: 32px; }
+.demo-label h1 { font-size: 18px; font-weight: 400; }
+.demo-label p { font-size: 13px; opacity: 0.4; margin-top: 8px; }
+
+/* ====== 核心对比器 ====== */
+.comparison {
+  position: relative;
+  width: 640px;
+  max-width: 90vw;
+  height: 400px;
+  border-radius: 12px;
+  overflow: hidden;
+  user-select: none;
+  cursor: ew-resize;
+}
+
+/* 两张图叠在同一位置 */
+.comparison__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* "现在"图（全宽显示） */
+.comparison__present {
+  z-index: 1;
+}
+
+/* "过去"图（被 clip-path 裁剪到左侧） */
+.comparison__past {
+  z-index: 2;
+  /* 初始: 显示左侧一半 */
+  clip-path: inset(0 50% 0 0);
+  /* clip-path 由 mousemove 直接驱动，不用 transition */
+}
+
+/* 分割线 */
+.comparison__divider {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: #fff;
+  z-index: 3;
+  left: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 8px rgba(0,0,0,0.5);
+}
+
+/* 拖动手柄 */
+.comparison__handle {
+  position: absolute;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fff;
+  z-index: 4;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  color: #1a1a1a;
+}
+
+/* 标签 */
+.comparison__label {
+  position: absolute;
+  bottom: 16px;
+  z-index: 5;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  pointer-events: none;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.comparison__label--past { left: 16px; }
+.comparison__label--present { right: 16px; }
+</style>
+</head>
+<body>
+<div>
+  <div class="demo-label">
+    <h1>Past & Present Slider</h1>
+    <p>左右拖动对比 · 来源: Persepolis Reimagined (Getty Museum)</p>
+  </div>
+
+  <div class="comparison" id="comparison">
+    <!-- 现在 (底层) -->
+    <img class="comparison__img comparison__present"
+         src="https://picsum.photos/seed/present/1280/800" alt="present">
+    <!-- 过去 (上层，被clip) -->
+    <img class="comparison__img comparison__past"
+         src="https://picsum.photos/seed/past/1280/800?grayscale" alt="past">
+
+    <!-- 分割线 + 手柄 -->
+    <div class="comparison__divider"></div>
+    <div class="comparison__handle">⟷</div>
+
+    <!-- 标签 -->
+    <div class="comparison__label comparison__label--past">3D 重建</div>
+    <div class="comparison__label comparison__label--present">现状</div>
+  </div>
+</div>
+
+<script>
+// ====== 拖动逻辑 ======
+function initComparison(containerId) {
+  const container = document.getElementById(containerId)
+  const past = container.querySelector('.comparison__past')
+  const divider = container.querySelector('.comparison__divider')
+  const handle = container.querySelector('.comparison__handle')
+
+  let isDragging = false
+
+  function setPosition(x) {
+    const rect = container.getBoundingClientRect()
+    let pos = (x - rect.left) / rect.width  // 0 ~ 1
+    pos = Math.max(0, Math.min(1, pos))
+
+    const percent = pos * 100
+    past.style.clipPath = `inset(0 ${100 - percent}% 0 0)`
+    divider.style.left = `${percent}%`
+    handle.style.left = `${percent}%`
+  }
+
+  // 鼠标事件
+  container.addEventListener('mousedown', (e) => {
+    isDragging = true
+    setPosition(e.clientX)
+  })
+
+  window.addEventListener('mousemove', (e) => {
+    if (isDragging) setPosition(e.clientX)
+  })
+
+  window.addEventListener('mouseup', () => {
+    isDragging = false
+  })
+
+  // 触控事件
+  container.addEventListener('touchstart', (e) => {
+    isDragging = true
+    setPosition(e.touches[0].clientX)
+  }, { passive: true })
+
+  container.addEventListener('touchmove', (e) => {
+    if (isDragging) setPosition(e.touches[0].clientX)
+  }, { passive: true })
+
+  container.addEventListener('touchend', () => {
+    isDragging = false
+  })
+}
+
+document.addEventListener('DOMContentLoaded', () => initComparison('comparison'))
+</script>
+</body>
+</html>

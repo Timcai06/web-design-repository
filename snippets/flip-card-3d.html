@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS 3D Flip Card — 翻转效果</title>
+<style>
+/*
+ * 来源: oryzo.ai (Lusion) — Encryption Demo
+ *
+ * DESIGN RATIONALE:
+ * - 3D 翻转模拟"卡片翻面"的物理体验 —— 隐藏/揭示信息的最自然方式
+ * - rotateX(180deg) = 上下翻转（"翻开"感）
+ * - rotateY(180deg) = 左右翻转（"翻牌"感）
+ * - perspective 创造纵深感 —— 没有 perspective 的 3D 翻转看起来像"图片缩放"
+ * - backface-visibility: hidden 防止反面镜像
+ *
+ * DECISION: rotateX vs rotateY?
+ * - rotateX: 上下翻，适合"翻开笔记本" —— 更正式
+ * - rotateY: 左右翻，适合"翻牌/卡片" —— 更流行
+ * - 这里用 rotateX（oryzo 原版）
+ *
+ * 适合:
+ * - 产品卡片的"正面→背面"信息
+ * - FAQ "点击显示答案"
+ * - 游戏/抽卡
+ * - Pricing card "按月/按年"切换
+ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #1a1a2e; font-family: system-ui, sans-serif;
+  display: grid; place-items: center; min-height: 100vh;
+  color: #fff;
+}
+
+.demo-label { text-align: center; margin-bottom: 40px; }
+.demo-label h1 { font-size: 18px; font-weight: 400; }
+.demo-label p { font-size: 13px; opacity: 0.4; margin-top: 8px; }
+
+/* ====== 核心翻转卡片 ====== */
+.flip-card {
+  /* perspective 是整个翻转效果的灵魂 — 没有它就没有 3D 纵深感 */
+  perspective: 800px;
+  width: 280px;
+  height: 380px;
+  cursor: pointer;
+}
+
+.flip-card__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.65, 0.05, 0, 1);
+}
+
+.flip-card.flipped .flip-card__inner {
+  transform: rotateX(180deg);
+}
+
+.flip-card__front,
+.flip-card__back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 16px;
+  padding: 32px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.flip-card__front {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.flip-card__front .icon { font-size: 48px; margin-bottom: 16px; }
+.flip-card__front h3 { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
+.flip-card__front p { font-size: 13px; opacity: 0.7; }
+.flip-card__front .hint {
+  position: absolute;
+  bottom: 20px;
+  font-size: 11px;
+  opacity: 0.3;
+}
+
+.flip-card__back {
+  background: #16213e;
+  transform: rotateX(180deg);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.flip-card__back .code {
+  font-family: 'SF Mono', monospace;
+  font-size: 14px;
+  background: rgba(0,0,0,0.3);
+  padding: 12px;
+  border-radius: 8px;
+  width: 100%;
+  text-align: left;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+/* ====== 调参 ====== */
+/* duration: 0.6s = 从容翻转，0.4s = 快速翻转（适合大量卡片） */
+/* easing: cubic-bezier(0.65,0.05,0,1) = 先慢后快再慢（品牌感） */
+/*         power4.out = 果断（技术感） */
+/*         back.out(2) = 弹性（活泼感） */
+</style>
+</head>
+<body>
+<div>
+  <div class="demo-label">
+    <h1>3D Flip Card</h1>
+    <p>点击翻转 · 来源: oryzo.ai Encryption Demo</p>
+  </div>
+
+  <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center">
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-card__inner">
+        <div class="flip-card__front">
+          <div>
+            <div class="icon">🔐</div>
+            <h3>Click to Decode</h3>
+            <p>Tap anywhere on this card to reveal the hidden message</p>
+          </div>
+          <div class="hint">tap to flip</div>
+        </div>
+        <div class="flip-card__back">
+          <div class="code">
+            &gt; ENCRYPTION KEY<br>
+            &gt; STATUS: UNLOCKED<br>
+            &gt; MESSAGE: "Design<br>
+            &nbsp;&nbsp;is intelligence<br>
+            &nbsp;&nbsp;made visible"
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-card__inner">
+        <div class="flip-card__front" style="background:linear-gradient(135deg, #f093fb 0%, #f5576c 100%)">
+          <div>
+            <div class="icon">🎨</div>
+            <h3>Design System</h3>
+            <p>Explore the components that power our visual language</p>
+          </div>
+          <div class="hint">tap to flip</div>
+        </div>
+        <div class="flip-card__back">
+          <div class="code">
+            &gt; TOKENS: 248<br>
+            &gt; COMPONENTS: 64<br>
+            &gt; PATTERNS: 12<br>
+            &gt; STATUS: LIVE
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

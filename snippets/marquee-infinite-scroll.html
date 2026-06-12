@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Marquee — 无限滚动</title>
+<style>
+/*
+ * 来源: landonorris.com (OFF+BRAND) / zentry.com (Resn)
+ * 两种实现: CSS @keyframes (轻量) / GSAP xPercent (灵活)
+ *
+ * DESIGN RATIONALE:
+ * - 无限循环创造"持续在场"感 —— logo 墙很适合在页面底部持续滚动
+ * - 首尾无缝需要精确 100% 宽度对应 —— 内容宽度 = 容器宽度时正好循环
+ * - 左右两个方向同时滚动创造"十字路口"的层次感
+ *
+ * DECISION: CSS 方案 vs GSAP 方案
+ * - CSS: 不需要 JS，适合简单 logo 墙（<20 个元素），不能 hover 暂停
+ * - GSAP: 可 hover 暂停，灵活控制速度，适合内容可交互的场景
+ * - 这里展示 GSAP 版本（zentry 风格），hover 暂停
+ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a0f; font-family: system-ui, sans-serif;
+  display: grid; place-items: center; min-height: 100vh;
+}
+
+/* ====== CSS 版本（不需要 JS，纯 CSS） ====== */
+.css-marquee-demo { width: 100%; max-width: 800px; margin-bottom: 80px; }
+.css-marquee-demo h3 { color: #fff; font-size: 14px; font-weight: 400; opacity: 0.4; margin-bottom: 16px; }
+
+.css-marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  mask-image: linear-gradient(90deg, transparent 0%, white 5%, white 95%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, white 5%, white 95%, transparent 100%);
+}
+
+.css-marquee__inner {
+  display: inline-flex;
+  gap: 64px;
+  animation: marqueeLeft 20s linear infinite;
+  padding: 16px 0;
+}
+
+.css-marquee__inner:hover {
+  animation-play-state: paused;
+}
+
+.css-marquee__inner span {
+  color: rgba(255,255,255,0.3);
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: color 0.3s;
+}
+
+.css-marquee__inner span:hover { color: rgba(255,255,255,0.8); }
+
+@keyframes marqueeLeft {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* 反向 */
+@keyframes marqueeRight {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.css-marquee__inner--right {
+  animation-name: marqueeRight;
+}
+
+/* ====== GSAP 版本（zentry 风格，可 hover 暂停） ====== */
+.gsap-marquee-demo { width: 100%; max-width: 800px; }
+.gsap-marquee-demo h3 { color: #fff; font-size: 14px; font-weight: 400; opacity: 0.4; margin-bottom: 16px; }
+
+.gsap-marquee {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent 0%, white 5%, white 95%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, white 5%, white 95%, transparent 100%);
+  background: rgba(255,255,255,0.02);
+  border-radius: 8px;
+}
+
+.gsap-marquee__track {
+  display: inline-flex;
+  gap: 48px;
+  padding: 16px 32px;
+  will-change: transform;
+}
+
+.gsap-marquee__item {
+  color: rgba(255,255,255,0.4);
+  font-size: 14px;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+}
+
+/* ====== 调参 ====== */
+/* 速度: 20s = 从容, 12s = 活泼, 30s = 优雅缓慢 */
+/* 间距: 48-80px 之间，太近显得拥挤太远显得松散 */
+/* mask gradient: 5%〜95% 保留可见区域，两端渐变消失 */
+</style>
+</head>
+<body>
+<div style="width:100%;padding:24px;max-width:800px">
+  <div class="css-marquee-demo">
+    <h3>CSS 版本 · hover 暂停</h3>
+    <div class="css-marquee">
+      <div class="css-marquee__inner">
+        <!-- 内容重复两遍实现无缝循环 -->
+        <span>Product</span><span>·</span><span>Design</span><span>·</span><span>Engineering</span><span>·</span>
+        <span>Strategy</span><span>·</span><span>Innovation</span><span>·</span>
+        <span>Product</span><span>·</span><span>Design</span><span>·</span><span>Engineering</span><span>·</span>
+        <span>Strategy</span><span>·</span><span>Innovation</span><span>·</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="gsap-marquee-demo">
+    <h3>GSAP 版本 · hover 暂停 · 反向</h3>
+    <div class="gsap-marquee">
+      <div class="gsap-marquee__track" id="marqueeTrack">
+        <span class="gsap-marquee__item">Zentry</span>
+        <span class="gsap-marquee__item" style="opacity:0.2">×</span>
+        <span class="gsap-marquee__item">Resn</span>
+        <span class="gsap-marquee__item" style="opacity:0.2">×</span>
+        <span class="gsap-marquee__item">Lusion</span>
+        <span class="gsap-marquee__item" style="opacity:0.2">×</span>
+        <span class="gsap-marquee__item">OFF+BRAND</span>
+        <span class="gsap-marquee__item" style="opacity:0.2">×</span>
+        <span class="gsap-marquee__item">Media.Monks</span>
+        <!-- 重复一遍 (clone by JS) -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+// GSAP 版 marquee — zentry 风格
+const track = document.getElementById('marqueeTrack')
+const items = track.innerHTML
+
+// 克隆内容以实现无缝循环
+track.innerHTML = items + items
+
+const marqueeTween = gsap.to(track, {
+  xPercent: -50,
+  repeat: -1,
+  duration: 30,
+  ease: 'none',
+})
+
+const marqueeContainer = track.parentElement
+marqueeContainer.addEventListener('mouseenter', () => marqueeTween.timeScale(0))
+marqueeContainer.addEventListener('mouseleave', () => marqueeTween.timeScale(1))
+</script>
+</body>
+</html>

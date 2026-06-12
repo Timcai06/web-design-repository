@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staggered Grid Reveal — 网格交错揭示</title>
+<style>
+/*
+ * 来源: oryzo.ai (Lusion)
+ *
+ * DESIGN RATIONALE:
+ * - clip-path: inset(0 0 100% 0) 从下往上揭示 = "从地面升起"
+ * - stagger delay 800ms = 每个元素依次弹出，形成"波浪"
+ * - data-offset 控制每个元素的延迟偏差 → 不规则的节奏更有"手工感"
+ *
+ * DECISION: stagger 从下往上 vs 从左往右？
+ * - 从下往上 (inset bottom→0): '升起感，适合内容区
+ * - 从左往右 (inset left→0): '阅读方向，适合文字
+ * - 从中心到四周: '爆发感，适合 Hero
+ *
+ * 适合:
+ * - 作品集网格
+ * - 社交证明（testimonials, 合作品牌）
+ * - 功能/产品展示（SaaS 的功能列表）
+ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #f5f5f0; font-family: system-ui, sans-serif;
+  color: #1a1a1a;
+}
+.spacer { height: 60vh; display: grid; place-items: center; opacity: 0.3; font-size: 13px; }
+
+.grid-section {
+  max-width: 900px; margin: 0 auto; padding: 40px 24px;
+}
+
+.grid-section h2 {
+  font-size: 28px; font-weight: 400; margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.grid-section .subtitle {
+  font-size: 15px; opacity: 0.4; margin-bottom: 48px;
+}
+
+/* ====== 网格 ====== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.grid-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #e0ddd5;
+  /* 初始状态: clip 到底部（不可见） */
+  clip-path: inset(0 0 100% 0);
+  will-change: clip-path;
+  transition: none; /* JS 控制 */
+}
+
+.grid-item.revealed {
+  clip-path: inset(0 0 0 0);
+}
+
+.grid-item img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.grid-item .label {
+  position: absolute;
+  bottom: 12px; left: 12px;
+  font-size: 12px;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+}
+
+.grid-item--wide {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+/* ====== data-offset 调参 ====== */
+/* 每个 grid-item 有 data-offset="${index * 80}" */
+/* 80ms 间隔:  密集波浪，适合 6-9 个网格 */
+/* 120ms 间隔: 宽松有节奏，适合 3-4 个网格 */
+/* 50ms 间隔:  快速连续，适合 >12 个网格 */
+
+.demo-label { text-align: center; margin-bottom: 32px; }
+</style>
+</head>
+<body>
+<div class="spacer">↓ scroll</div>
+
+<section class="grid-section">
+  <h2>Selected Work</h2>
+  <p class="subtitle">Each piece emerges as you scroll</p>
+
+  <div class="grid" id="revealGrid">
+    <div class="grid-item grid-item--wide" data-offset="0">
+      <img src="https://picsum.photos/seed/g1/600/600" alt="">
+      <span class="label">Brand Identity</span>
+    </div>
+    <div class="grid-item" data-offset="100">
+      <img src="https://picsum.photos/seed/g2/300/300" alt="">
+      <span class="label">UI Design</span>
+    </div>
+    <div class="grid-item" data-offset="200">
+      <img src="https://picsum.photos/seed/g3/300/300" alt="">
+      <span class="label">Motion</span>
+    </div>
+    <div class="grid-item" data-offset="350">
+      <img src="https://picsum.photos/seed/g4/300/300" alt="">
+      <span class="label">3D</span>
+    </div>
+    <div class="grid-item" data-offset="450">
+      <img src="https://picsum.photos/seed/g5/300/300" alt="">
+      <span class="label">WebGL</span>
+    </div>
+    <div class="grid-item" data-offset="550">
+      <img src="https://picsum.photos/seed/g6/300/300" alt="">
+      <span class="label">Strategy</span>
+    </div>
+  </div>
+</section>
+
+<div class="spacer">end</div>
+
+<script>
+// ====== Staggered IntersectionObserver ======
+function initGridReveal(gridId) {
+  const grid = document.getElementById(gridId)
+  const items = grid.querySelectorAll('.grid-item')
+
+  items.forEach(item => {
+    const offset = parseInt(item.dataset.offset) || 0
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          item.style.transition =
+            `clip-path 0.9s cubic-bezier(0.65, 0.05, 0, 1)`
+          item.classList.add('revealed')
+        }, offset)
+        observer.unobserve(item)
+      }
+    }, { threshold: 0.2 })
+
+    observer.observe(item)
+  })
+}
+
+document.addEventListener('DOMContentLoaded', () => initGridReveal('revealGrid'))
+</script>
+</body>
+</html>

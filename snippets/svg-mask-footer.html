@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SVG Mask Footer — 有机形状底栏</title>
+<style>
+/*
+ * 来源: landonorris.com (OFF+BRAND)
+ *
+ * DESIGN RATIONALE:
+ * - 大多数 footer 是"矩形框底部放链接"—— 无聊但容易
+ * - SVG mask 把 footer 剪切成品牌图形（LN4 logo、签名、字母）
+ * - 有机形状打破了"盒子"感 —— 页面结束不是"截止"而是"融入"
+ * - 移动端用简化版 SVG（landonorris 的做法）—— 复杂形状在小屏上看不清
+ *
+ * DECISION: SVG mask vs clip-path?
+ * - clip-path: 只能做几何形（circle, ellipse, polygon）
+ * - SVG mask: 任意矢量路径 —— logo 轮廓、手写签名、波浪
+ * - 这里用 SVG mask（landonorris 的做法）
+ *
+ * 适合:
+ * - 品牌站 footer（用 logo 轮廓做剪影）
+ * - 个人站（用签名/头像轮廓）
+ * - Section 分割（代替直线，用有机形状过渡）
+ *
+ * 不适合:
+ * - 信息密集的 footer（链接太多时 mask 反而干扰可读性）
+ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0d0d0d; font-family: system-ui, sans-serif;
+  color: #fff; min-height: 100vh;
+}
+
+.content {
+  min-height: 80vh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.content h1 {
+  font-size: 32px; font-weight: 300;
+  letter-spacing: -0.02em;
+  max-width: 500px;
+  line-height: 1.4;
+}
+
+.content p {
+  font-size: 14px; opacity: 0.3;
+  margin-top: 16px;
+}
+
+/* ====== 核心: SVG Mask Footer ====== */
+.site-footer {
+  /* === SVG mask 应用 === */
+  /* mask-image 引用页面内的 SVG（用 id）或外部 svg 文件 */
+  -webkit-mask-image: url('#footerMask');
+  mask-image: url('#footerMask');
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+
+  /* footer 内容区域 */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 80px 40px 40px;
+  min-height: 300px;
+
+  /* 降级：如果 mask 不支持，至少显示颜色 */
+  @supports not (mask-image: url('')) {
+    padding-top: 40px;
+  }
+}
+
+.footer-content {
+  max-width: 800px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 40px;
+}
+
+.footer-content h3 {
+  font-size: 14px; font-weight: 600;
+  margin-bottom: 16px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.footer-content p {
+  font-size: 13px;
+  opacity: 0.5;
+  line-height: 1.6;
+}
+
+.footer-content a {
+  display: block;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  margin-bottom: 8px;
+  transition: color 0.3s;
+}
+
+.footer-content a:hover { color: #fff; }
+
+.footer-bottom {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  padding-top: 40px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 12px;
+  opacity: 0.3;
+}
+
+/* 非 mask 版本（兜底） */
+.footer-fallback {
+  display: none;
+}
+
+/* ====== 调参 ====== */
+/* SVG mask 设计: 在 Figma/Illustrator 中导出品牌元素的 path */
+/* 移动端用更简单形状（减少 SVG path 点数） */
+/* mask 边缘最好有渐变消失（用 SVG 的渐变填充作为 mask） */
+</style>
+</head>
+<body>
+
+<!-- 定义 SVG mask（页面内，避免外部加载延迟） -->
+<svg style="position:absolute;width:0;height:0" aria-hidden="true">
+  <defs>
+    <mask id="footerMask" maskContentUnits="objectBoundingBox">
+      <!--
+        一个有机形状的 mask:
+        - 顶部: 波浪曲线（品牌化不规则边缘）
+        - 底部: 直线
+      -->
+      <rect x="0" y="0" width="1" height="1" fill="black"/>
+      <path d="
+        M 0,0
+        C 0.05,0.03 0.1,-0.02 0.15,0
+        C 0.2,0.02 0.25,0.05 0.3,0.03
+        C 0.35,0.01 0.38,-0.01 0.42,0
+        C 0.48,0.02 0.52,0.06 0.58,0.04
+        C 0.62,0.02 0.65,-0.01 0.7,0
+        C 0.75,0.01 0.78,0.04 0.82,0.03
+        C 0.88,0.01 0.92,-0.01 0.96,0
+        C 0.98,0.01 0.99,0.02 1,0.01
+        L 1,1 L 0,1 Z
+        " fill="white"/>
+    </mask>
+  </defs>
+</svg>
+
+<div class="content">
+  <div>
+    <h1>Good design is like a wave —<br>it has shape, rhythm, and flow.</h1>
+    <p>Scroll to see the footer mask in action</p>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-content">
+    <div>
+      <h3>About</h3>
+      <p>Creating digital experiences that live at the intersection of technology and craft. Based in Brooklyn, working worldwide.</p>
+    </div>
+    <div>
+      <h3>Services</h3>
+      <a href="#">Design</a>
+      <a href="#">Development</a>
+      <a href="#">Strategy</a>
+      <a href="#">Motion</a>
+    </div>
+    <div>
+      <h3>Contact</h3>
+      <a href="#">hello@example.com</a>
+      <a href="#">Twitter</a>
+      <a href="#">GitHub</a>
+      <a href="#">LinkedIn</a>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Studio</span>
+      <span>Designed with intention</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scroll Progress Indicator</title>
+<style>
+/*
+ * 来源: landonorris.com / oryzo.ai
+ *
+ * DESIGN RATIONALE:
+ * - 告诉用户"你看到了多少，还剩多少" — 减少滚动过程中的焦虑（"还有完没完？"）
+ * - 细线 2-3px：不抢眼但足够可见（太粗会分散注意力）
+ * - 右侧 vs 底部：landonorris 用右侧细线，Oryzo 用底部
+ *   - 右侧：不占用内容的垂直空间，但右侧在移动端可能被误触
+ *   - 底部：明显，但占用底部空间，与 mobile browser chrome 重叠
+ *
+ * DECISION: 右侧 vs 底部 vs 顶部？
+ * - 右侧（细线）：最不干扰内容，推荐用于品牌站/作品集 — landonorris 做法
+ * - 底部（条状）：最明显，推荐用于营销站/长文 — Oryzo 做法
+ * - 顶部（进度条）：浏览器默认感，不推荐（用户可能误认为 browser UI）
+ *
+ * 适合: 所有长滚动页面（>3 屏内容）
+ * 不适合: 短页面、dashboard、工具型页面
+ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #f5f5f0; font-family: system-ui, sans-serif;
+  color: #1a1a1a;
+}
+
+.section {
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+
+.section:nth-child(odd) { background: #fafaf5; }
+
+.section h2 { font-size: 24px; font-weight: 300; letter-spacing: -0.01em; }
+.section p { font-size: 13px; opacity: 0.3; margin-top: 8px; }
+
+/* ====== 右侧指示器（landonorris 风格） ====== */
+.indicator-right {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 2px;
+  height: 100vh;
+  background: rgba(0,0,0,0.06);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.indicator-right__bar {
+  width: 100%;
+  height: 0%;
+  background: #1a1a1a;
+  transition: height 0.1s linear;
+  border-radius: 0 0 1px 1px;
+}
+
+/* ====== 底部指示器（oryzo 风格） ====== */
+.indicator-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  z-index: 1000;
+  transition: width 0.1s linear;
+  pointer-events: none;
+  border-radius: 0 2px 0 0;
+}
+
+.demo-label {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 1001;
+  background: rgba(255,255,255,0.9);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.demo-label span { opacity: 0.4; }
+</style>
+</head>
+<body>
+
+<div class="demo-label">
+  Scroll Progress: <span id="progressText">0%</span>
+  · 右侧线 (landonorris) + 底部条 (Oryzo)
+</div>
+
+<!-- 右侧指示器 -->
+<div class="indicator-right">
+  <div class="indicator-right__bar" id="barRight"></div>
+</div>
+
+<!-- 底部指示器 -->
+<div class="indicator-bottom" id="barBottom"></div>
+
+<section class="section"><div><h2>Scroll Down</h2><p>两个进度指示器同时工作</p></div></section>
+<section class="section"><div><h2>Chapter 01</h2><p>右侧细线 — 不干扰内容</p></div></section>
+<section class="section"><div><h2>Chapter 02</h2><p>底部渐变条 — 明显可见</p></div></section>
+<section class="section"><div><h2>Chapter 03</h2><p>这两个可以在不同项目中任选</p></div></section>
+<section class="section"><div><h2>End</h2><p>指示器已满</p></div></section>
+
+<script>
+function updateProgress() {
+  const scrollTop = window.scrollY
+  const docHeight = document.body.scrollHeight - window.innerHeight
+  const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
+
+  document.getElementById('barRight').style.height = `${progress}%`
+  document.getElementById('barBottom').style.width = `${progress}%`
+  document.getElementById('progressText').textContent = `${Math.round(progress)}%`
+}
+
+window.addEventListener('scroll', updateProgress, { passive: true })
+updateProgress()
+</script>
+</body>
+</html>

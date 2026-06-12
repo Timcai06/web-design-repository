@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audio Visualizer — 装饰性音频跳动</title>
+<style>
+/*
+ * 来源: zentry.com (Resn)
+ *
+ * DESIGN RATIONALE:
+ * - 不需要真的有音频在播放 —— 这只是装饰性动效
+ * - 伪随机跳动模拟"声音可视化" — 页面因此有了"心跳"
+ * - 条状高度 4-20px 范围 —— 太短看不见，太长抢眼
+ * - 7 条柱 = 经典均衡器形态 —— 人脑对这个模式有天然认知
+ *
+ * DECISION: 放在哪？
+ * - Nav 角落（zentry 做法）→ "这个页面是活的"的背景信号
+ * - Preloader → 让等待时间更愉悦
+ * - 背景装饰 → 类似"下雨"等环境效果
+ *
+ * 适合: 任何想让页面"感觉"有生命感的地方
+ * 不适合: 已经有过多装饰动效的页面
+ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a0f; font-family: system-ui, sans-serif;
+  display: grid; place-items: center; min-height: 100vh;
+  color: #fff;
+}
+
+.viz-demo {
+  text-align: center;
+}
+
+/* ====== 核心 ====== */
+.viz {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  height: 80px;
+  margin: 40px 0;
+}
+
+.viz__bar {
+  width: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to top, #667eea, #764ba2);
+  /* 初始高度，JS 会覆盖 */
+  height: 20px;
+  /* 过度帧平滑 */
+  transition: height 0.08s ease;
+}
+
+/* ====== 变体: 彩色 ====== */
+.viz--color .viz__bar:nth-child(1) { background: linear-gradient(to top, #f093fb, #f5576c); }
+.viz--color .viz__bar:nth-child(2) { background: linear-gradient(to top, #4facfe, #00f2fe); }
+.viz--color .viz__bar:nth-child(3) { background: linear-gradient(to top, #43e97b, #38f9d7); }
+.viz--color .viz__bar:nth-child(4) { background: linear-gradient(to top, #fa709a, #fee140); }
+.viz--color .viz__bar:nth-child(5) { background: linear-gradient(to top, #667eea, #764ba2); }
+.viz--color .viz__bar:nth-child(6) { background: linear-gradient(to top, #f093fb, #f5576c); }
+.viz--color .viz__bar:nth-child(7) { background: linear-gradient(to top, #4facfe, #00f2fe); }
+
+.demo-label h1 { font-size: 18px; font-weight: 400; }
+.demo-label p { font-size: 13px; opacity: 0.4; margin-bottom: 24px; }
+
+/* 控制 */
+.controls { display: flex; gap: 16px; justify-content: center; margin-top: 24px; }
+.controls button {
+  padding: 8px 16px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: transparent;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.3s;
+}
+.controls button:hover { background: rgba(255,255,255,0.05); }
+</style>
+</head>
+<body>
+<div class="viz-demo">
+  <div class="demo-label">
+    <h1>Audio Visualizer</h1>
+    <p>来源: zentry.com HUD 导航 · 装饰性动效（无需真实音频）</p>
+  </div>
+
+  <!-- 默认版 -->
+  <div class="viz" id="viz1">
+    <div class="viz__bar" style="height:12px"></div>
+    <div class="viz__bar" style="height:20px"></div>
+    <div class="viz__bar" style="height:8px"></div>
+    <div class="viz__bar" style="height:28px"></div>
+    <div class="viz__bar" style="height:16px"></div>
+    <div class="viz__bar" style="height:24px"></div>
+    <div class="viz__bar" style="height:10px"></div>
+  </div>
+
+  <!-- 彩色版 -->
+  <div class="viz viz--color" id="viz2">
+    <div class="viz__bar" style="height:16px"></div>
+    <div class="viz__bar" style="height:10px"></div>
+    <div class="viz__bar" style="height:22px"></div>
+    <div class="viz__bar" style="height:8px"></div>
+    <div class="viz__bar" style="height:18px"></div>
+    <div class="viz__bar" style="height:12px"></div>
+    <div class="viz__bar" style="height:26px"></div>
+  </div>
+
+  <div class="controls">
+    <button onclick="toggleAll()">⏸ 暂停/继续</button>
+    <button onclick="setSpeed(0.5)">慢速</button>
+    <button onclick="setSpeed(1)">正常</button>
+    <button onclick="setSpeed(2)">快速</button>
+  </div>
+</div>
+
+<script>
+// ====== 装饰性音频可视化 ======
+class Visualizer {
+  constructor(containerId, { min = 6, max = 40, interval = 180 } = {}) {
+    this.container = document.getElementById(containerId)
+    this.bars = this.container.querySelectorAll('.viz__bar')
+    this.min = min
+    this.max = max
+    this.interval = interval
+    this.running = true
+    this.speed = 1
+    this._timer = null
+    this.start()
+  }
+
+  update() {
+    if (!this.running) return
+    this.bars.forEach(bar => {
+      const h = this.min + Math.random() * (this.max - this.min)
+      bar.style.height = `${h}px`
+    })
+  }
+
+  start() {
+    this.stop()
+    this._timer = setInterval(() => this.update(), this.interval / this.speed)
+  }
+
+  stop() {
+    if (this._timer) {
+      clearInterval(this._timer)
+      this._timer = null
+    }
+  }
+
+  toggle() {
+    this.running = !this.running
+    if (this.running) this.start()
+    else this.stop()
+  }
+
+  setSpeed(s) {
+    this.speed = s
+    if (this.running) this.start()
+  }
+}
+
+const viz1 = new Visualizer('viz1', { min: 6, max: 40, interval: 200 })
+const viz2 = new Visualizer('viz2', { min: 8, max: 50, interval: 150 })
+
+function toggleAll() {
+  viz1.toggle()
+  viz2.toggle()
+}
+function setSpeed(s) {
+  viz1.setSpeed(s)
+  viz2.setSpeed(s)
+}
+</script>
+</body>
+</html>

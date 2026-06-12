@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stats Counter — 数字计数器动画</title>
+<style>
+/*
+ * 来源: zentry.com (Resn)
+ *
+ * DESIGN RATIONALE:
+ * - 数字从 0 增长到目标值 → "见证感"，适合信任指标（用户数、收入、年份）
+ * - GSAP onUpdate + power3.out → 先快后慢，模拟"真实增长曲线"
+ * - 滚动触发 → 用户滚动到数字区域时才开始计数，制造"此刻开始"的临场感
+ *
+ * DECISION: GSAP vs IntersectionObserver + setInterval?
+ * - GSAP: 更流畅（RAF 驱动），可精确控制 ease，性能更好
+ * - setInterval: 实现简单但可能丢帧，ease 需要手动计算
+ * - 推荐 GSAP（zentry 做法），数字量多时性能优势明显
+ *
+ * 适合:
+ * - 信任指标（$ funded, users, countries）
+ * - 统计数据（years of experience, projects completed）
+ * - 游戏/娱乐（分数、等级）
+ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a0f; font-family: system-ui, sans-serif; color: #fff;
+}
+.spacer { height: 80vh; display: grid; place-items: center; opacity: 0.3; }
+
+.counter-section {
+  max-width: 800px; margin: 0 auto; padding: 80px 24px;
+  text-align: center;
+}
+
+.counter-section h2 {
+  font-size: 16px; font-weight: 400; opacity: 0.4;
+  margin-bottom: 48px; letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.counter-grid {
+  display: flex; justify-content: center; gap: 80px;
+  flex-wrap: wrap;
+}
+
+.counter-item {
+  text-align: center;
+}
+
+.counter-item .number {
+  font-size: 56px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.counter-item .suffix {
+  font-size: 28px;
+  font-weight: 300;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.counter-item .label {
+  font-size: 14px;
+  opacity: 0.4;
+  margin-top: 8px;
+  letter-spacing: 0.02em;
+}
+
+/* ====== 调参 ====== */
+/* 数字字体: 56px hero, 32px subtitle, 20px 小标签 */
+/* gradient: 品牌色主色 + 深色，2-3 色渐变 */
+/* duration: 1.5-2.5s — 太快看不清过程，太慢等不急 */
+/* ease: power3.out — 先快后慢（"增长"感）vs power1.out — 匀速（"计数"感） */
+</style>
+</head>
+<body>
+<div class="spacer">↓ scroll</div>
+
+<section class="counter-section" id="counterSection">
+  <h2>By the numbers</h2>
+  <div class="counter-grid" id="counterGrid">
+    <div class="counter-item">
+      <div><span class="number" data-target="500">0</span><span class="suffix">M</span></div>
+      <div class="label">Transactions</div>
+    </div>
+    <div class="counter-item">
+      <div><span class="number" data-target="28">0</span><span class="suffix">K</span></div>
+      <div class="label">Creators</div>
+    </div>
+    <div class="counter-item">
+      <div><span class="number" data-target="190">0</span><span class="suffix">+</span></div>
+      <div class="label">Countries</div>
+    </div>
+    <div class="counter-item">
+      <div><span class="number" data-target="15">0</span><span class="suffix">B</span></div>
+      <div class="label">Volume</div>
+    </div>
+  </div>
+</section>
+
+<div class="spacer">end</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger)
+
+// ====== 计数器动画 ======
+function initCounters(containerId) {
+  const container = document.getElementById(containerId)
+  const numbers = container.querySelectorAll('.number[data-target]')
+
+  numbers.forEach(numEl => {
+    const target = parseInt(numEl.dataset.target)
+
+    ScrollTrigger.create({
+      trigger: numEl,
+      start: 'top 90%',
+      once: true,
+      onEnter: () => {
+        const obj = { value: 0 }
+        gsap.to(obj, {
+          value: target,
+          duration: 2,
+          ease: 'power3.out',
+          onUpdate: () => {
+            // 数字较大时省略小数
+            const display = target > 100
+              ? Math.round(obj.value)
+              : obj.value.toFixed(1)
+            numEl.textContent = display
+          },
+        })
+      },
+    })
+  })
+}
+
+document.addEventListener('DOMContentLoaded', () => initCounters('counterGrid'))
+</script>
+</body>
+</html>
