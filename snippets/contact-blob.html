@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Contact Blob (300vmax)</title>
+<style>
+/* ====== 来源: lukebaffait.fr (Lusion) ====== */
+/* 300vmax 圆形缩放，模拟液泡从底部涨出 */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0d0d0d;
+  font-family: system-ui, sans-serif;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+.spacer {
+  height: 80vh;
+  display: grid;
+  place-items: center;
+  opacity: 0.3;
+}
+
+/* ====== Blob 容器 ====== */
+.blob-section {
+  position: relative;
+  height: 120vh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ====== 核心 Blob ====== */
+.blob {
+  position: absolute;
+  bottom: 0;
+  /* === 核心: 300vmax === */
+  /* vmax = max(viewport width, viewport height) */
+  /* 300vmax 保证无论屏幕比例如何，圆形都远大于视口 */
+  width: 300vmax;
+  height: 300vmax;
+  background: #fff;
+  border-radius: 50%;
+  /* 默认 scale(0)，用 GSAP 或 IntersectionObserver 触发到 scale(1) */
+  transform: scale(0) translateY(30%);
+  /* translateY(30%) 让初始位置偏下，展开时从底部"涨"出 */
+  will-change: transform;
+  transition: transform 1.6s cubic-bezier(0.65, 0.05, 0, 1);
+  z-index: 0;
+}
+
+.blob.visible {
+  transform: scale(1) translateY(0);
+}
+
+/* ====== Blob 上的内容 ====== */
+.blob-content {
+  position: relative;
+  z-index: 1;
+  color: #1a1a1a;
+  text-align: center;
+  padding: 80px 24px;
+  max-width: 600px;
+  /* 内容与 blob 同步出现 */
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease 0.6s, transform 0.8s ease 0.6s;
+}
+
+.blob-content.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.blob-content h2 {
+  font-size: 32px;
+  margin-bottom: 16px;
+}
+
+.blob-content p {
+  font-size: 16px;
+  opacity: 0.7;
+  line-height: 1.6;
+}
+
+/* ====== 调参 ====== */
+/* 圆润感:   border-radius: 50% → 始终是正圆形，从底部涨出最自然 */
+/* 速度:     duration 1.6s → 从容的液体感，太快会像"弹出来" */
+/* 触发:     IntersectionObserver → 滚动到该 section 时触发 */
+
+.demo-label {
+  position: fixed;
+  top: 24px; left: 50%; transform: translateX(-50%);
+  text-align: center; z-index: 100;
+}
+.demo-label h1 { font-size: 16px; }
+.demo-label p { font-size: 12px; opacity: 0.4; }
+</style>
+</head>
+<body>
+
+<div class="demo-label">
+  <h1>Contact Blob (300vmax)</h1>
+  <p>来源: lukebaffait.fr · 液泡从底部涨出</p>
+</div>
+
+<div class="spacer">↓ scroll down ↓</div>
+
+<section class="blob-section" id="blobSection">
+  <div class="blob" id="blob"></div>
+  <div class="blob-content" id="blobContent">
+    <h2>Let's talk</h2>
+    <p>Got a project in mind? Whether it's a brand experience, a 3D showcase, or something entirely different — I'd love to hear about it.</p>
+  </div>
+</section>
+
+<div class="spacer">end</div>
+
+<script>
+// ====== IntersectionObserver 触发 Blob ======
+function initBlob() {
+  const blob = document.getElementById('blob');
+  const content = document.getElementById('blobContent');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        blob.classList.add('visible');
+        content.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.1
+  });
+
+  observer.observe(document.getElementById('blobSection'));
+}
+
+document.addEventListener('DOMContentLoaded', initBlob);
+</script>
+</body>
+</html>

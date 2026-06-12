@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Perspective Tilt Card</title>
+<style>
+/* ====== 来源: zentry.com (Resn) ====== */
+/* usePerspectiveTransform composable 提取为纯 JS 版本 */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  display: grid; place-items: center; min-height: 100vh;
+  background: #0a0a0f; font-family: system-ui, sans-serif;
+}
+
+.demo-label {
+  text-align: center; color: #fff; margin-bottom: 32px;
+}
+.demo-label h1 { font-size: 20px; margin-bottom: 8px; }
+.demo-label p { font-size: 14px; opacity: 0.5; }
+
+/* ====== 核心卡片 ====== */
+.card-grid {
+  display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;
+  perspective: 1200px;
+}
+
+.tilt-card {
+  width: 240px;
+  height: 320px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #1a1a2e, #16213e);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 24px;
+  color: #fff;
+  /* === 核心: perspective + transform 由 JS 驱动 === */
+  transform-style: preserve-3d;
+  transform:
+    perspective(800px)
+    rotateX(0deg)
+    rotateY(0deg)
+    scale(1);
+  transition: transform 0.1s ease-out;
+  /* transition 提供基础平滑；JS 的 lerp 在 RAF 中做精确阻尼 */
+  will-change: transform;
+  cursor: pointer;
+}
+
+.tilt-card h3 { font-size: 18px; margin-bottom: 8px; }
+.tilt-card p { font-size: 13px; opacity: 0.6; line-height: 1.5; }
+
+.tilt-card__shine {
+  position: absolute; inset: 0; border-radius: 16px;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255,255,255,0.1) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div>
+  <div class="demo-label">
+    <h1>Perspective Tilt Card</h1>
+    <p>来源: zentry.com · 鼠标驱动 3D 倾斜 + 阻尼平滑</p>
+  </div>
+  <div class="card-grid" id="cardGrid">
+    <div class="tilt-card">
+      <div class="tilt-card__shine"></div>
+      <h3>Immerse</h3>
+      <p>Step into the human-agentic operating system for the next generation of digital interaction.</p>
+    </div>
+    <div class="tilt-card">
+      <div class="tilt-card__shine"></div>
+      <h3>Explore</h3>
+      <p>Navigate through a reimagined digital landscape where intelligence meets intuition.</p>
+    </div>
+    <div class="tilt-card">
+      <div class="tilt-card__shine"></div>
+      <h3>Evolve</h3>
+      <p>Watch your digital ecosystem grow and adapt with every interaction.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ====== Perspective Tilt 核心逻辑 ======
+// 提取自 Zentry 的 usePerspectiveTransform + useDamp composable
+
+function initTilt(container) {
+  const cards = container.querySelectorAll('.tilt-card');
+
+  cards.forEach(card => {
+    // 目标角度（鼠标位置驱动）
+    let targetX = 0, targetY = 0;
+    // 当前角度（lerp 追赶目标）
+    let currentX = 0, currentY = 0;
+
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;   // 0 ~ 1
+      const y = (e.clientY - rect.top) / rect.height;    // 0 ~ 1
+
+      // 将鼠标坐标映射到旋转角度（中心为 0）
+      targetY = (x - 0.5) * 16;   // -8deg ~ +8deg
+      targetX = (0.5 - y) * 10;   // -5deg ~ +5deg
+
+      // Shine 跟随鼠标
+      card.style.setProperty('--mouse-x', `${x * 100}%`);
+      card.style.setProperty('--mouse-y', `${y * 100}%`);
+    });
+
+    card.addEventListener('mouseleave', () => {
+      targetX = 0;
+      targetY = 0;
+    });
+
+    // RAF 循环：阻尼 lerp 平滑跟随
+    function animate() {
+      // === 核心: lerp 阻尼 ===
+      // 0.12 = 阻尼系数。越大跟踪越快 (0.2=灵敏), 越小越粘滞 (0.05=迟钝)
+      currentX += (targetX - currentX) * 0.12;
+      currentY += (targetY - currentY) * 0.12;
+
+      // 当角度接近 0 且不活跃时停止 RAF 以节省性能可加阈值判断
+      card.style.transform =
+        `perspective(800px) rotateX(${currentX}deg) rotateY(${currentY}deg) scale(${1 + (1 - Math.abs(currentX) / 10) * 0.02})`;
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+  });
+}
+
+initTilt(document.getElementById('cardGrid'));
+</script>
+</body>
+</html>

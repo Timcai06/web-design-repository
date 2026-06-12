@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word-Level Blur Reveal</title>
+<style>
+/* ====== 来源: lukebaffait.fr (Lusion) ====== */
+/* 每个词独立 ScrollTrigger，从 blur→clear */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0d0d0d; font-family: system-ui, sans-serif; color: #fff; }
+
+.spacer { height: 100vh; display: grid; place-items: center; opacity: 0.3; }
+
+/* ====== 核心文字区域 ====== */
+.reveal-section {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.reveal-text {
+  font-size: 24px;
+  line-height: 1.8;
+  font-weight: 300;
+}
+
+.reveal-text .word {
+  display: inline-block;
+  /* === 核心: 初始状态 = 模糊 + 隐藏 === */
+  opacity: 0;
+  filter: blur(8px);
+  transition: opacity 0.6s ease, filter 0.6s ease;
+  /* 过渡由 ScrollTrigger 触发 */
+}
+
+.reveal-text .word.visible {
+  opacity: 1;
+  filter: blur(0px);
+}
+
+/* ====== 调参 ====== */
+/* Hero 大字: blur(12px), duration 0.8s */
+/* 正文:     blur(4-6px), duration 0.4-0.6s */
+/* 小标签:   blur(2px), duration 0.3s */
+
+.demo-label { text-align: center; margin-bottom: 40px; }
+.demo-label h1 { font-size: 20px; }
+.demo-label p { font-size: 14px; opacity: 0.4; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="spacer">↓ scroll down ↓</div>
+
+<section class="reveal-section">
+  <div class="demo-label">
+    <h1>Word-Level Blur Reveal</h1>
+    <p>来源: lukebaffait.fr · 每个词 blur → clear 独立触发</p>
+  </div>
+  <p class="reveal-text" id="revealText">
+    Every word you see here started as a blur. As you scroll, each one steps into focus — one at a time, at its own pace. This is the same technique used on Luke Baffait's portfolio, where words emerge from a soft blur into sharp clarity. It mimics the way your eyes refocus when you look at something closely. The effect is subtle — most people won't notice the blur at all. They'll just feel like the reading experience is unusually smooth.
+  </p>
+</section>
+
+<div class="spacer">↓ end ↓</div>
+
+<script>
+// ====== Word-Level Blur Reveal 核心逻辑 ======
+// 无依赖纯 JS 实现（原版使用 GSAP ScrollTrigger + 每个 word 独立 trigger）
+
+function initWordReveal(elementId) {
+  const container = document.getElementById(elementId);
+  if (!container) return;
+
+  // 1. 将文字按单词拆分，每个 word 用 span 包裹
+  const words = container.textContent.trim().split(/\s+/);
+  container.innerHTML = words.map(word =>
+    `<span class="word">${word}</span>`
+  ).join(' ');
+
+  // 2. 每个 word 独立 IntersectionObserver
+  const wordEls = container.querySelectorAll('.word');
+
+  // 用 Map 缓存每个 word 的 observer
+  const observers = new Map();
+
+  wordEls.forEach((word, index) => {
+    // 每个 word 有独立的触发阈值和延迟
+    // 前几个词提早触发，后面的正常触发
+    const delay = index * 30; // stagger 30ms per word
+    const margin = index < 10 ? '-50px' : '0px';
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // stagger 延迟
+          setTimeout(() => {
+            word.classList.add('visible');
+          }, delay);
+          // 只触发一次
+          observer.unobserve(word);
+        }
+      });
+    }, {
+      rootMargin: `${margin} 0px -40px 0px`,
+      threshold: 0.3
+    });
+
+    observer.observe(word);
+    observers.set(word, observer);
+  });
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', () => {
+  initWordReveal('revealText');
+});
+</script>
+</body>
+</html>

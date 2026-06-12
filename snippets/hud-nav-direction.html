@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HUD Navigation — Direction-Aware</title>
+<style>
+/* ====== 来源: zentry.com (Resn) ====== */
+/* 浮动 HUD 导航 + 滚动方向感知隐藏/显示 */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a0f;
+  font-family: system-ui, sans-serif;
+  color: #fff;
+}
+
+/* ====== 核心 HUD 导航 ====== */
+.hud-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* === 核心: 半透明 HUD 风格 === */
+  background: rgba(10, 10, 15, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  /* === 方向感知变换 === */
+  transform: translateY(0);
+  transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.hud-nav.hidden {
+  transform: translateY(-100%);
+}
+
+.hud-nav__logo {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.hud-nav__links {
+  display: flex;
+  gap: 24px;
+  font-size: 13px;
+}
+
+.hud-nav__links a {
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  transition: color 0.3s;
+  position: relative;
+}
+
+.hud-nav__links a:hover { color: rgba(255,255,255,0.9); }
+
+/* 当前激活链接指示器 */
+.hud-nav__links a.active { color: #fff; }
+.hud-nav__links a.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0; right: 0;
+  height: 1px;
+  background: #fff;
+}
+
+/* ====== 音频可视化器 (装饰) ====== */
+.audio-viz {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 16px;
+}
+
+.viz-bar {
+  width: 2px;
+  border-radius: 1px;
+  background: rgba(255,255,255,0.6);
+  transition: height 0.1s ease;
+}
+
+/* ====== 内容区域 ====== */
+.section {
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.section:nth-child(odd) { background: #0d0d14; }
+.section:nth-child(even) { background: #111120; }
+
+.section h2 { font-size: 24px; font-weight: 300; letter-spacing: 0.05em; }
+.section p { font-size: 13px; opacity: 0.3; margin-top: 8px; }
+
+/* ====== 方向提示 ====== */
+.scroll-hint {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  opacity: 0.3;
+  z-index: 999;
+  transition: opacity 0.3s;
+}
+</style>
+</head>
+<body>
+
+<!-- ====== HUD 导航 ====== -->
+<nav class="hud-nav" id="hudNav">
+  <div class="hud-nav__logo">
+    <span style="opacity:0.4">◈</span> Zentry
+  </div>
+  <div style="display:flex;align-items:center;gap:32px">
+    <div class="hud-nav__links">
+      <a href="#" class="active">Home</a>
+      <a href="#">Nexus</a>
+      <a href="#">Token</a>
+      <a href="#">About</a>
+    </div>
+    <!-- 音频可视化器 (装饰) -->
+    <div class="audio-viz" id="audioViz">
+      <span class="viz-bar" style="height:6px"></span>
+      <span class="viz-bar" style="height:10px"></span>
+      <span class="viz-bar" style="height:14px"></span>
+      <span class="viz-bar" style="height:8px"></span>
+      <span class="viz-bar" style="height:12px"></span>
+    </div>
+  </div>
+</nav>
+
+<div class="scroll-hint" id="scrollHint">↓ scroll</div>
+
+<!-- ====== 内容 ====== -->
+<section class="section"><div><h2>REDEFINE REALITY</h2><p>scroll down to explore</p></div></section>
+<section class="section"><div><h2>Nexus</h2><p>Where intelligence converges</p></div></section>
+<section class="section"><div><h2>ZENT Token</h2><p>The fuel of the ecosystem</p></div></section>
+<section class="section"><div><h2>Who We Are</h2><p>Building the future of interaction</p></div></section>
+
+<script>
+// ====== 方向感知导航 ======
+function initHudNav(navId, vizId, hintId) {
+  const nav = document.getElementById(navId);
+  const hint = document.getElementById(hintId);
+  const bars = document.querySelectorAll(`#${vizId} .viz-bar`);
+
+  let lastScroll = 0;
+  let ticking = false;
+
+  // 音频可视化器 (装饰性伪随机跳动)
+  function updateViz() {
+    bars.forEach(bar => {
+      bar.style.height = `${4 + Math.random() * 14}px`;
+    });
+  }
+  setInterval(updateViz, 200);
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        const currentScroll = window.scrollY;
+
+        // === 核心逻辑: 方向检测 ===
+        if (currentScroll > lastScroll && currentScroll > 100) {
+          // 向下滚动 > 100px → 隐藏导航
+          nav.classList.add('hidden');
+        } else {
+          // 向上滚动 → 显示导航
+          nav.classList.remove('hidden');
+        }
+
+        // 更新滚动提示
+        if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 100) {
+          hint.style.opacity = '0';
+        } else {
+          hint.style.opacity = '0.3';
+        }
+
+        lastScroll = currentScroll;
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initHudNav('hudNav', 'audioViz', 'scrollHint');
+});
+</script>
+</body>
+</html>

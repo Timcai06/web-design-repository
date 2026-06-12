@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clip-Path Ellipse Hover Reveal</title>
+<style>
+/* ====== 来源: landonorris.com (OFF+BRAND) ====== */
+/* 纯 CSS hover 揭示，零 JavaScript */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  display: grid; place-items: center; min-height: 100vh;
+  background: #1a1a1a; font-family: system-ui, sans-serif;
+}
+
+/* ====== 核心组件 ====== */
+.reveal-card {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  overflow: hidden;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.reveal-card__base {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.reveal-card__overlay {
+  position: absolute;
+  inset: 0;
+  /* === 核心: clip-path ellipse 从顶部展开 === */
+  clip-path: ellipse(0% 0% at 50% 0%);
+  transition: clip-path 0.75s cubic-bezier(0.65, 0.05, 0, 1);
+  /* landonorris 用的 easing: 从容、优雅、品牌感 */
+}
+
+.reveal-card__overlay img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.reveal-card:hover .reveal-card__overlay {
+  /* 120% 让椭圆超出底部，视觉更饱满 */
+  clip-path: ellipse(120% 120% at 50% 0%);
+}
+
+/* ====== 调参指南 ====== */
+/* 电商:   duration 0.4s, easing: cubic-bezier(0.4, 0, 0.2, 1) */
+/* 品牌:   duration 0.75s, easing: cubic-bezier(0.65, 0.05, 0, 1) */
+/* 奢侈:   duration 1.2s, easing: cubic-bezier(0.8, 0.2, 0.5, 1) */
+/* 活泼:   clip-path: circle(0% at 50% 50%) → circle(100% at 50% 50%) */
+/* 优雅:   clip-path: inset(50% 0% 50% 0%) → inset(0% 0% 0% 0%) */
+
+/* ====== 演示装饰 ====== */
+.demo-label {
+  text-align: center; color: #fff; margin-bottom: 24px;
+}
+.demo-label h1 { font-size: 20px; margin-bottom: 8px; }
+.demo-label p { font-size: 14px; opacity: 0.6; }
+.demo-grid { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+</style>
+</head>
+<body>
+<div>
+  <div class="demo-label">
+    <h1>Clip-Path Ellipse Hover</h1>
+    <p>来源: landonorris.com · 纯 CSS · 零 JS</p>
+  </div>
+  <div class="demo-grid">
+    <div class="reveal-card">
+      <img class="reveal-card__base" src="https://picsum.photos/seed/a/320/320" alt="base">
+      <div class="reveal-card__overlay">
+        <img src="https://picsum.photos/seed/b/320/320" alt="overlay">
+      </div>
+    </div>
+    <div class="reveal-card">
+      <img class="reveal-card__base" src="https://picsum.photos/seed/c/320/320" alt="base">
+      <div class="reveal-card__overlay">
+        <img src="https://picsum.photos/seed/d/320/320" alt="overlay">
+      </div>
+    </div>
+    <div class="reveal-card">
+      <img class="reveal-card__base" src="https://picsum.photos/seed/e/320/320" alt="base">
+      <div class="reveal-card__overlay">
+        <img src="https://picsum.photos/seed/f/320/320" alt="overlay">
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
